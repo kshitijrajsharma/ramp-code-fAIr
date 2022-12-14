@@ -45,7 +45,7 @@ packaging==21.3
 pandas
 partd==1.2.0
 Pillow==9.0.1
-pip==21.2.4
+pip==22.3.1
 pycosat==0.6.3
 pycparser==2.21
 pyOpenSSL==21.0.0
@@ -63,7 +63,7 @@ scikit-image==0.19.2
 scikit-learn==1.0.2
 scipy
 segmentation-models==1.0.1
-setuptools==61.0.0
+setuptools==65.6.3
 Shapely==1.8.0
 six==1.16.0
 snuggs==1.4.7
