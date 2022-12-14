@@ -1,5 +1,7 @@
+# Standard library imports
 import os
 
+# Third party imports
 from setuptools import find_packages, setup
 
 
@@ -21,7 +23,7 @@ def readme() -> str:
 
 setup(
     name="ramp-fair",
-    version="0.1.1",
+    version="0.1.2",
     author="Carolyn Johnston",
     author_email="carolyn.johnston@dev.global",
     description="Replicable AI for Microplanning , Fork maintained for fAIr",
