@@ -1,0 +1,34 @@
+name: Publish Docker Image to GHCR
+
+on:
+  push:
+    branches:
+      - master
+      - release/*
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.pb
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/ramp-tensorflow-gpu:latest
+            ghcr.io/${{ github.repository }}/ramp-tensorflow-gpu:${{ github.sha }}
