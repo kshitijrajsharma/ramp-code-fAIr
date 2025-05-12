@@ -51,7 +51,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     else \
     pip install --no-cache-dir tensorflow==${TF_VER}; \
     fi && \
-    pip install --no-cache-dir -r /tmp/pipped-requirements.txt
+    pip install --no-cache-dir -r /tmp/pipped-requirements.txt && \
+    pip install "GDAL==$(gdal-config --version)"
 
 # Install solaris (local)
 COPY solaris /tmp/solaris
