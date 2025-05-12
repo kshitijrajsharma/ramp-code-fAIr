@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE} AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gdal-bin \
     libgdal-dev \
-    python3-opencv && \
+    python3-opencv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,7 +31,7 @@ FROM ${BASE_IMAGE}
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gdal-bin \
     libgdal-dev \
-    python3-opencv && \
+    python3-opencv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
