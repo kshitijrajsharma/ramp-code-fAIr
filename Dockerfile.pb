@@ -56,17 +56,17 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Install solaris (local)
 COPY solaris /tmp/solaris
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir /tmp/solaris --use-feature=in-tree-build
+    pip install --no-cache-dir /tmp/solaris 
 
 # Install scikit-fmm
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir scikit-fmm --use-feature=in-tree-build
+    pip install --no-cache-dir scikit-fmm 
 
 # Install ramp (local)
 COPY setup.py README.md /tmp/ramp-code/
 COPY ramp /tmp/ramp-code/ramp
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir /tmp/ramp-code --use-feature=in-tree-build
+    pip install --no-cache-dir /tmp/ramp-code 
 
 # ==============================================================================
 # === Final minimal runtime image =============================================
