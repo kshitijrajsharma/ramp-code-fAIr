@@ -2,7 +2,7 @@
 #   CPU: docker build --build-arg BUILD_TYPE=cpu -t ramp-fair:cpu .
 #   GPU: docker build --build-arg BUILD_TYPE=gpu -t ramp-fair:gpu .
 
-ARG PY_VER=3.9
+ARG PY_VER=3.10
 ARG TF_VER=2.9.2
 ARG BUILD_TYPE=gpu
 ARG CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
