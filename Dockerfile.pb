@@ -1,4 +1,7 @@
-FROM tensorflow/tensorflow:2.9.2-gpu AS builder
+# Define build arg with default as gpu
+ARG BASE_IMAGE=tensorflow/tensorflow:2.9.2-gpu
+
+FROM ${BASE_IMAGE} AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gdal-bin \
@@ -21,7 +24,8 @@ COPY setup.py README.md /tmp/ramp-code/
 COPY ramp /tmp/ramp-code/ramp
 RUN --mount=type=cache,target=/root/.cache/pip pip install --no-cache-dir /tmp/ramp-code --use-feature=in-tree-build
 
-FROM tensorflow/tensorflow:2.9.2-gpu
+# Use the same base image for the final stage
+FROM ${BASE_IMAGE}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gdal-bin \
