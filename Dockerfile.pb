@@ -1,48 +1,76 @@
-# Define build arg with default as gpu
-ARG BASE_IMAGE=tensorflow/tensorflow:2.9.2-gpu
+# Build instructions:
+#   CPU:  docker build --build-arg BUILD_TYPE=cpu -t ramp-fair:cpu .
+#   GPU:  docker build --build-arg BUILD_TYPE=gpu -t ramp-fair:gpu .
 
-FROM ${BASE_IMAGE} AS builder
+ARG PY_VER=3.9
+ARG TF_VER=2.9.2
+ARG BUILD_TYPE=gpu
+ARG CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# ----- CPU base --------------------------------------------------------------
+FROM python:${PY_VER}-slim-bullseye AS cpu-base
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    python${PY_VER}-dev \
     gdal-bin \
     libgdal-dev \
     python3-opencv \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
-    C_INCLUDE_PATH=/usr/include/gdal
+# ----- GPU base --------------------------------------------------------------
+FROM nvidia/cuda:${CUDA_TAG} AS gpu-base
+ENV DEBIAN_FRONTEND=noninteractive
+ARG PY_VER
 
-COPY docker/pipped-requirements.txt /tmp/pipped-requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip pip install --no-cache-dir -r /tmp/pipped-requirements.txt
-
-COPY solaris /tmp/solaris
-RUN --mount=type=cache,target=/root/.cache/pip pip install --no-cache-dir /tmp/solaris --use-feature=in-tree-build
-
-RUN --mount=type=cache,target=/root/.cache/pip pip install --no-cache-dir scikit-fmm --use-feature=in-tree-build
-
-COPY setup.py README.md /tmp/ramp-code/
-COPY ramp /tmp/ramp-code/ramp
-RUN --mount=type=cache,target=/root/.cache/pip pip install --no-cache-dir /tmp/ramp-code --use-feature=in-tree-build
-
-# Use the same base image for the final stage
-FROM ${BASE_IMAGE}
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    curl \
+    build-essential \
+    gcc \
+    g++ \
     gdal-bin \
     libgdal-dev \
     python3-opencv \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python${PY_VER} \
+    python${PY_VER}-distutils \
+    python${PY_VER}-venv \
+    python${PY_VER}-dev \
+    && ln -s /usr/bin/python${PY_VER} /usr/local/bin/python3 && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python${PY_VER} && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/include/gdal /usr/include/gdal
-COPY --from=builder /usr/lib/python3/dist-packages/ /usr/lib/python3/dist-packages/
-COPY --from=builder /usr/local/lib/python3.8/dist-packages/ /usr/local/lib/python3.8/dist-packages/
+# ----- select base -----------------------------------------------------------
+FROM ${BUILD_TYPE}-base AS base
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ----- Python: TensorFlow then project deps ----------------------------------
+ARG TF_VER
+ARG BUILD_TYPE
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir --upgrade pip && \
+    if [ "$BUILD_TYPE" = "gpu" ]; then \
+    pip install --no-cache-dir tensorflow-gpu==${TF_VER}; \
+    else \
+    pip install --no-cache-dir tensorflow==${TF_VER}; \
+    fi
+
+COPY docker/pipped-requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r pipped-requirements.txt
 
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
-    RAMP_HOME=/tf
+    RAMP_HOME=/app
 
-WORKDIR /tf
-
+WORKDIR /app
 CMD ["bash"]
