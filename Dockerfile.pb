@@ -9,12 +9,12 @@ ARG CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
 
 # ==============================================================================
 # === CPU base image (minimal) =================================================
-FROM python:${PY_VER}-slim-bullseye AS cpu-base
+FROM python:${PY_VER}-slim-bookworm AS cpu-base
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential gcc g++ python${PY_VER}-dev \
-    gdal-bin libgdal-dev python3-opencv \
+    build-essential gcc g++ python3-dev \
+    gdal-bin libgdal-dev python3-gdal python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
 # ==============================================================================
