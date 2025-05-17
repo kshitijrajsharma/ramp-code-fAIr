@@ -74,8 +74,8 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
     RAMP_HOME=/app
 
-COPY --from=builder /usr/local/lib/python3*/dist-packages/ /usr/local/lib/python3*/dist-packages/
-COPY --from=builder /usr/lib/python3*/dist-packages/ /usr/lib/python3*/dist-packages/
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder /usr/lib/python*/ /usr/lib/python*/
 COPY --from=builder /usr/include/gdal /usr/include/gdal
 
 WORKDIR /app
