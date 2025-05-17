@@ -46,11 +46,7 @@ COPY docker/pipped-requirements.txt /tmp/pipped-requirements.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir --upgrade pip && \
-    if [ "$BUILD_TYPE" = "gpu" ]; then \
-    pip install --no-cache-dir tensorflow-gpu==${TF_VER}; \
-    else \
-    pip install --no-cache-dir tensorflow==${TF_VER}; \
-    fi && \
+    pip install --no-cache-dir tensorflow==${TF_VER} && \
     pip install --no-cache-dir -r /tmp/pipped-requirements.txt && \
     pip install "GDAL==$(gdal-config --version)"
 
