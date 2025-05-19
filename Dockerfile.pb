@@ -25,7 +25,7 @@ ARG PY_VER
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     software-properties-common curl build-essential \
-    gcc g++ gdal-bin libgdal-dev python3-opencv \
+    gcc g++ gdal-bin libgdal-dev libpq-dev python3-opencv \
     && add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
