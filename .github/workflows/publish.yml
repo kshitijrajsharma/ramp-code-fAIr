@@ -15,6 +15,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Set image tags
+        id: meta
+        run: |
+          BRANCH_NAME=${GITHUB_REF##*/}
+          echo "branch_tag=${BRANCH_NAME//\//-}" >> "$GITHUB_OUTPUT"
 
       # 1. QEMU setup for cross-platform emulation
       - name: Set up QEMU
@@ -45,10 +50,12 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest-gpu
-            ghcr.io/${{ github.repository }}:${{ github.sha }}-gpu
+            ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.branch_tag }}-gpu
           build-args: |
-            BASE_IMAGE=tensorflow/tensorflow:2.9.2-gpu
-
+            BUILD_TYPE=gpu
+            PY_VER=3.10
+            TF_VER=2.9.2
+            CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
       # 4. Multi-arch CPU image
       - name: Build and push CPU Docker image
         uses: docker/build-push-action@v6
@@ -59,6 +66,8 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest-cpu
-            ghcr.io/${{ github.repository }}:${{ github.sha }}-cpu
+            ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.branch_tag }}-cpu
           build-args: |
-            BASE_IMAGE=tensorflow/tensorflow:2.9.2
+            BUILD_TYPE=cpu
+            PY_VER=3.10
+            TF_VER=2.9.2
