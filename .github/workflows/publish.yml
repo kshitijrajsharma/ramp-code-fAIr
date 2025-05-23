@@ -37,7 +37,7 @@ jobs:
 
       # 3. Multi-arch GPU image
       - name: Build and push GPU Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.pb
@@ -51,7 +51,7 @@ jobs:
 
       # 4. Multi-arch CPU image
       - name: Build and push CPU Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.pb
