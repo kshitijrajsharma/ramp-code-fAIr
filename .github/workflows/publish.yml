@@ -16,47 +16,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 1. QEMU setup for cross-platform emulation
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      # 2. Buildx setup (ensures we have a multi-arch builder)
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set image tags
-        id: meta
-        run: |
-          BRANCH_NAME=${GITHUB_REF##*/}
-          echo "branch_tag=${BRANCH_NAME//\//-}" >> "$GITHUB_OUTPUT"
-
+      # 3. Multi-arch GPU image
       - name: Build and push GPU Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile.pb
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest-gpu
-            ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.branch_tag }}-gpu
+            ghcr.io/${{ github.repository }}:${{ github.sha }}-gpu
           build-args: |
-            BUILD_TYPE=gpu
-            PY_VER=3.10
-            TF_VER=2.9.2
-            CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
+            BASE_IMAGE=tensorflow/tensorflow:2.9.2-gpu
 
+      # 4. Multi-arch CPU image
       - name: Build and push CPU Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile.pb
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest-cpu
-            ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.branch_tag }}-cpu
+            ghcr.io/${{ github.repository }}:${{ github.sha }}-cpu
           build-args: |
-            BUILD_TYPE=cpu
-            PY_VER=3.10
-            TF_VER=2.9.2
+            BASE_IMAGE=tensorflow/tensorflow:2.9.2
