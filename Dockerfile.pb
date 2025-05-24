@@ -15,8 +15,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential gcc g++ python3-dev python3-rtree \
     gdal-bin libgdal-dev python3-gdal python3-opencv libspatialindex-dev \
-    && rm -rf /var/lib/apt/lists/*
-
+    && rm -rf /var/lib/apt/lists/* && \
+    python3 -m pip install --upgrade pip
 # ==============================================================================
 # === GPU base image (CUDA + runtime-only Python & GDAL) =======================
 FROM nvidia/cuda:${CUDA_TAG} AS gpu-base
