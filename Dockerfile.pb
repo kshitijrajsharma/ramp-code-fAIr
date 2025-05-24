@@ -9,6 +9,7 @@ ARG CUDA_TAG=11.8.0-cudnn8-runtime-ubuntu22.04
 
 # ==============================================================================
 # === CPU base image (minimal) =================================================
+
 FROM python:${PY_VER}-slim-bookworm AS cpu-base
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
