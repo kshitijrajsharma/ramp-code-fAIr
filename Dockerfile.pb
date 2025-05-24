@@ -24,7 +24,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 python3-pip build-essential gcc g++ python3-dev python3-rtree python-is-python3 \
-    gdal-bin libgdal-dev python3-gdal python3-opencv libspatialindex-dev \
+    gdal-bin libgdal-dev python3-gdal python3-opencv libspatialindex-dev cuda-toolkit-11-8 \
     && rm -rf /var/lib/apt/lists/* && \
     python3 -m pip install --upgrade pip
 
