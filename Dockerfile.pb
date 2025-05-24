@@ -36,13 +36,6 @@ ARG BUILD_TYPE
 
 COPY docker/pipped-requirements.txt /tmp/pipped-requirements.txt
 
-# # On GPU, install build & dev dependencies so we can compile GDAL
-# RUN if [ "$BUILD_TYPE" = "gpu" ]; then \
-#     apt-get update && apt-get install -y --no-install-recommends \
-#     build-essential gcc g++ python3-dev python3-rtree \
-#     libgdal-dev swig libspatialindex-dev libpq-dev && \
-#     rm -rf /var/lib/apt/lists/*; \
-#     fi
 
 # Use pip cache and install Python packages (including building GDAL)
 RUN --mount=type=cache,target=/root/.cache/pip \
