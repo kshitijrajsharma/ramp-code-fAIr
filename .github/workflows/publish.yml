@@ -55,7 +55,7 @@ jobs:
             BUILD_TYPE=gpu
             PY_VER=3.10
             TF_VER=2.9.2
-            CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
+            CUDA_TAG=11.8.0-cudnn8-runtime-ubuntu22.04
       # 4. Multi-arch CPU image
       - name: Build and push CPU Docker image
         uses: docker/build-push-action@v6
