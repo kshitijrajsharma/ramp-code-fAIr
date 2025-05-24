@@ -1,4 +1,8 @@
+
+
 # [Replicable AI for Microplanning (ramp)](https://rampml.global/) 
+
+## This is fork of the Original RAMP repo to be maintained for the latest python and dependecies ! 
 
 Our team aspires to turn over control of the data value chain to humanitarians. The Replicable AI for Microplanning (ramp) project is producing an open-source deep learning model to accurately digitize buildings in low-and-middle-income countries using satellite imagery as well as enable in-country users to build their own deep learning models for their regions of interest.
 
