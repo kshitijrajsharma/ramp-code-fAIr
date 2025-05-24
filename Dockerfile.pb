@@ -3,10 +3,10 @@
 #   GPU: docker build -f Dockerfile.pb --build-arg BUILD_TYPE=gpu -t ramp-fair:gpu .
 
 ARG PY_VER=3.10
-ARG TF_VER=2.9.2
+ARG TF_VER=2.9.3
 ARG BUILD_TYPE=gpu
 ARG CUDA_TAG=11.8.0-cudnn8-runtime-ubuntu22.04
-ARG CUDA_DEVEL_TAG=11.8.0-cudnn8-devel-ubuntu22.04
+# ARG CUDA_DEVEL_TAG=11.8.0-cudnn8-devel-ubuntu22.04
 
 # ==============================================================================
 # === CPU base image (minimal) =================================================
@@ -29,7 +29,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/* && \
     python3 -m pip install --upgrade pip
 
-FROM nvidia/cuda:${CUDA_DEVEL_TAG} AS cuda-dev
+# FROM nvidia/cuda:${CUDA_DEVEL_TAG} AS cuda-dev
 
 
 # ==============================================================================
@@ -76,7 +76,7 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /usr/lib/python*/ /usr/lib/python*/
 COPY --from=builder /usr/include/gdal /usr/include/gdal
-COPY --from=cuda-dev /usr/local/cuda/nvvm/libdevice /usr/local/cuda/nvvm/libdevice
+# COPY --from=cuda-dev /usr/local/cuda/nvvm/libdevice /usr/local/cuda/nvvm/libdevice
 
 WORKDIR /app
 CMD ["bash"]
