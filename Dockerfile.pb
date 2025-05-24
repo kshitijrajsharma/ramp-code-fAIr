@@ -1,11 +1,11 @@
 # Build instructions:
-#   CPU: docker build --build-arg BUILD_TYPE=cpu -t ramp-fair:cpu .
-#   GPU: docker build --build-arg BUILD_TYPE=gpu -t ramp-fair:gpu .
+#   CPU: docker build -f Dockerfile.pb --build-arg BUILD_TYPE=cpu -t ramp-fair:cpu .
+#   GPU: docker build -f Dockerfile.pb --build-arg BUILD_TYPE=gpu -t ramp-fair:gpu .
 
 ARG PY_VER=3.10
 ARG TF_VER=2.9.2
 ARG BUILD_TYPE=gpu
-ARG CUDA_TAG=11.2.2-cudnn8-runtime-ubuntu20.04
+ARG CUDA_TAG=11.8.0-cudnn8-runtime-ubuntu22.04
 
 # ==============================================================================
 # === CPU base image (minimal) =================================================
@@ -13,8 +13,8 @@ FROM python:${PY_VER}-slim-bookworm AS cpu-base
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential gcc g++ python3-dev \
-    gdal-bin libgdal-dev python3-gdal python3-opencv \
+    build-essential gcc g++ python3-dev python3-rtree \
+    gdal-bin libgdal-dev python3-gdal python3-opencv libspatialindex-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # ==============================================================================
@@ -24,17 +24,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG PY_VER
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    software-properties-common curl build-essential \
-    gcc g++ gdal-bin libgdal-dev libpq-dev python3-opencv \
-    && add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python${PY_VER} python${PY_VER}-dev python${PY_VER}-venv \
-    python${PY_VER}-distutils \
-    && ln -s /usr/bin/python${PY_VER} /usr/local/bin/python3 && \
-    curl -sS https://bootstrap.pypa.io/get-pip.py | python${PY_VER} && \
-    rm -rf /var/lib/apt/lists/*
-
+    build-essential gcc g++ python3-dev python3-rtree \
+    gdal-bin libgdal-dev python3-gdal python3-opencv libspatialindex-dev \
+    && rm -rf /var/lib/apt/lists/*
 # ==============================================================================
 # === Builder stage (installs everything) =====================================
 FROM ${BUILD_TYPE}-base AS builder
@@ -47,8 +39,9 @@ COPY docker/pipped-requirements.txt /tmp/pipped-requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir --upgrade pip more-itertools && \
     pip install --no-cache-dir tensorflow==${TF_VER} && \
-    pip install --no-cache-dir -r /tmp/pipped-requirements.txt && \
-    pip install "GDAL==$(gdal-config --version)"
+    pip install "GDAL==$(gdal-config --version)" && \
+    pip install --no-cache-dir -r /tmp/pipped-requirements.txt
+
 
 # Install solaris (local)
 COPY solaris /tmp/solaris
