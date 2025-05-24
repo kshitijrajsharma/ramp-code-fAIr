@@ -18,17 +18,17 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # ==============================================================================
-# === GPU base image (CUDA + custom Python install) ===========================
+# === GPU base image (CUDA + runtime-only Python & GDAL) =======================
 FROM nvidia/cuda:${CUDA_TAG} AS gpu-base
 ENV DEBIAN_FRONTEND=noninteractive
-ARG PY_VER
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential gcc g++ python3-dev python3-rtree \
+    python3 python3-pip build-essential gcc g++ python3-dev python3-rtree \
     gdal-bin libgdal-dev python3-gdal python3-opencv libspatialindex-dev \
     && rm -rf /var/lib/apt/lists/*
+
 # ==============================================================================
-# === Builder stage (installs everything) =====================================
+# === Builder stage (installs everything) ======================================
 FROM ${BUILD_TYPE}-base AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 ARG TF_VER
@@ -36,30 +36,38 @@ ARG BUILD_TYPE
 
 COPY docker/pipped-requirements.txt /tmp/pipped-requirements.txt
 
+# # On GPU, install build & dev dependencies so we can compile GDAL
+# RUN if [ "$BUILD_TYPE" = "gpu" ]; then \
+#     apt-get update && apt-get install -y --no-install-recommends \
+#     build-essential gcc g++ python3-dev python3-rtree \
+#     libgdal-dev swig libspatialindex-dev libpq-dev && \
+#     rm -rf /var/lib/apt/lists/*; \
+#     fi
+
+# Use pip cache and install Python packages (including building GDAL)
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir --upgrade pip more-itertools && \
     pip install --no-cache-dir tensorflow==${TF_VER} && \
     pip install "GDAL==$(gdal-config --version)" && \
     pip install --no-cache-dir -r /tmp/pipped-requirements.txt
 
-
 # Install solaris (local)
 COPY solaris /tmp/solaris
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir /tmp/solaris 
+    pip install --no-cache-dir /tmp/solaris
 
 # Install scikit-fmm
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir scikit-fmm 
+    pip install --no-cache-dir scikit-fmm
 
 # Install ramp (local)
 COPY setup.py README.md /tmp/ramp-code/
 COPY ramp /tmp/ramp-code/ramp
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir /tmp/ramp-code 
+    pip install --no-cache-dir /tmp/ramp-code
 
 # ==============================================================================
-# === Final minimal runtime image =============================================
+# === Final minimal runtime image ==============================================
 FROM ${BUILD_TYPE}-base AS final
 ENV DEBIAN_FRONTEND=noninteractive
 
